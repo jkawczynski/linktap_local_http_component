@@ -9,7 +9,7 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.const import STATE_UNKNOWN
-from homeassistant.helpers import entity_platform, service
+from homeassistant.helpers import entity_platform, entity_registry as er, service
 from homeassistant.helpers.entity import *
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -79,13 +79,15 @@ class LinktapSwitch(CoordinatorEntity, SwitchEntity):
 
     @property
     def duration_entity(self) -> str:
-        slug = slugify(self._name)  # HA-native conversion
-        return f"number.{DOMAIN}_{slug}_watering_duration"
+        unique_id = slugify(f"{DOMAIN}_number_{self.tap_id}_Watering_Duration")
+        registry = er.async_get(self.hass)
+        return registry.async_get_entity_id("number", DOMAIN, unique_id)
 
     @property
     def volume_entity(self) -> str:
-        slug = slugify(self._name)
-        return f"number.{DOMAIN}_{slug}_watering_volume"
+        unique_id = slugify(f"{DOMAIN}_number_{self.tap_id}_Watering_Volume")
+        registry = er.async_get(self.hass)
+        return registry.async_get_entity_id("number", DOMAIN, unique_id)
 
     async def async_turn_on(self, **kwargs):
         duration = self.get_watering_duration()
@@ -204,8 +206,9 @@ class LinktapPauseSwitch(CoordinatorEntity, SwitchEntity):
 
     @property
     def pause_duration_entity(self) -> str:
-        slug = slugify(self.tap_name)  # Use original tap name, not self._name
-        return f"number.{DOMAIN}_{slug}_pause_duration"
+        unique_id = slugify(f"{DOMAIN}_number_{self.tap_id}_pause_duration")
+        registry = er.async_get(self.hass)
+        return registry.async_get_entity_id("number", DOMAIN, unique_id)
 
     @property
     def is_on(self):
